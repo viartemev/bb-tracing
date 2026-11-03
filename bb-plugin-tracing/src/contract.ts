@@ -1,7 +1,12 @@
 // The RPC contract shared by server.ts and the UI. Both bundle it, so the
 // schemas validate on the wire in both directions.
-import { defineRpcContract } from "@get-bb/plugin-sdk";
+import type { defineRpcContract as SdkDefineRpcContract } from "@get-bb/plugin-sdk";
 import { z } from "zod";
+
+// The SDK's defineRpcContract only returns its argument; it exists for the
+// types. The UI bundle cannot import the SDK's root entry (bb shims only
+// @get-bb/plugin-sdk/app), so this module keeps the types and drops the call.
+const defineRpcContract = ((contract: unknown) => contract) as typeof SdkDefineRpcContract;
 
 const attrsSchema = z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]));
 const recordSchema = z.object({
