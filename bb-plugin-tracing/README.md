@@ -7,7 +7,7 @@ Local tracing for bb, modelled on OpenBot's `logs/trace.ndjson` and
 
 - **Under every answer**, in the message's action row: a chip with the
   turn's duration and tool count (a pulsing dot while it runs, red when
-  something failed). Clicking it opens that turn's trace in the side panel.
+  something failed). Clicking it opens that turn's trace viewer.
 - **Trace viewer** (click the chip): a large window modelled on OpenBot's.
   A strip of duration, tokens, model calls, tool calls and errors; the turn
   as a root row with every step on one overview track; one row per step
@@ -36,9 +36,11 @@ Local tracing for bb, modelled on OpenBot's `logs/trace.ndjson` and
   `seq` of its event, and the panel reads the content from bb's own thread
   history when you open it (blocks are cut at 100,000 characters).
   *All turns* lists every traced turn of the thread.
-- **Tracing page** in the sidebar: turns, p50/p95, tool failures and thinking
-  time for the last 1h/24h/7d, recent turns across threads, the slowest span
-  names, and sparklines of the bb server's memory, CPU and event loop.
+- **Tracing page** in the sidebar: turns, p50/p95, tool failures, thinking
+  time and token spend for the last 1h/24h/7d; recent turns across threads
+  (click one for its trace viewer, the arrow goes to the thread); the
+  slowest span names; and sparklines of the bb server's memory, CPU and
+  event loop.
 
 UI sources are in `ui/`; the RPC contract both sides share is
 `src/contract.ts`. Colors are bb theme variables, so custom palettes and dark

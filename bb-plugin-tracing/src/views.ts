@@ -100,7 +100,7 @@ export class TraceIndex {
         .filter((r) => r.kind === "reasoning")
         .reduce((sum, r) => sum + r.durationMs, 0),
       top: summarize(recent.filter((r) => r.kind !== "turn" && r.kind !== "thread")).slice(0, 10),
-      recentTurns: turns.slice(-15).reverse(),
+      recentTurns: turns.slice(-25).reverse(),
     };
   }
 }

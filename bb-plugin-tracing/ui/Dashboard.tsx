@@ -7,6 +7,7 @@ import {
   useBbNavigate,
 } from "@get-bb/plugin-sdk/app";
 import { rpcContract } from "../src/contract.ts";
+import { TraceDialog } from "./TraceDialog.tsx";
 import { TokenBreakdown, formatTokenCount } from "./Tokens.tsx";
 import {
   CATEGORY,
@@ -146,41 +147,66 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function RecentTurns({ turns, now }: { turns: (Span & { threadTitle: string | null })[]; now: number }) {
-  const navigate = useBbNavigate();
   const longest = Math.max(...turns.map((t) => t.durationMs), 1);
   return (
     <ul className="divide-y divide-border">
-      {turns.map((turn, i) => {
-        const attrs = turn.attrs ?? {};
-        return (
-          <li key={turn.turnRequestId ?? i}>
-            <button
-              type="button"
-              onClick={() => turn.threadId && navigate.toThread(turn.threadId)}
-              className="grid w-full grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 px-3 py-2.5 text-left transition-colors hover:bg-muted/50"
-            >
-              <span className="truncate text-sm text-foreground">{turn.threadTitle ?? turn.threadId}</span>
-              <span className="text-right text-sm font-medium tabular-nums text-foreground">{formatMs(turn.durationMs)}</span>
-              <span className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground">
-                <span>{formatAgo(turn.at, now)}</span>
-                <span>{Number(attrs.tools ?? 0)} tools</span>
-                {Number(attrs.toolErrors ?? 0) > 0 && <span className="text-destructive">{Number(attrs.toolErrors)} failed</span>}
-                {turn.outcome !== "completed" && <OutcomePill outcome={turn.outcome} />}
-              </span>
-              <span className="h-1.5 w-24 overflow-hidden rounded-full bg-muted sm:w-40">
-                <span
-                  className="block h-full rounded-full"
-                  style={{
-                    width: `${(turn.durationMs / longest) * 100}%`,
-                    background: turn.outcome === "completed" ? "var(--timeline-accent)" : "var(--destructive)",
-                  }}
-                />
-              </span>
-            </button>
-          </li>
-        );
-      })}
+      {turns.map((turn, i) => (
+        <RecentTurn key={turn.turnRequestId ?? i} turn={turn} now={now} longest={longest} />
+      ))}
     </ul>
+  );
+}
+
+/** A row opens the turn's trace viewer; the arrow goes to its thread. */
+function RecentTurn({ turn, now, longest }: { turn: Span & { threadTitle: string | null }; now: number; longest: number }) {
+  const navigate = useBbNavigate();
+  const [open, setOpen] = useState(false);
+  const attrs = turn.attrs ?? {};
+  const row = (
+    <button
+      type="button"
+      disabled={!turn.turnId}
+      title={turn.turnId ? "Open this turn's trace" : "Recorded before turns were linked to the trace viewer"}
+      className="grid min-w-0 flex-1 grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-2.5 pl-3 text-left"
+    >
+      <span className="truncate text-sm text-foreground">{turn.threadTitle ?? turn.threadId}</span>
+      <span className="text-right text-sm font-medium tabular-nums text-foreground">{formatMs(turn.durationMs)}</span>
+      <span className="flex items-center gap-3 text-xs tabular-nums text-muted-foreground">
+        <span>{formatAgo(turn.at, now)}</span>
+        <span>{Number(attrs.tools ?? 0)} tools</span>
+        {Number(attrs.toolErrors ?? 0) > 0 && <span className="text-destructive">{Number(attrs.toolErrors)} failed</span>}
+        {turn.outcome !== "completed" && <OutcomePill outcome={turn.outcome} />}
+      </span>
+      <span className="h-1.5 w-24 overflow-hidden rounded-full bg-muted sm:w-40">
+        <span
+          className="block h-full rounded-full"
+          style={{
+            width: `${(turn.durationMs / longest) * 100}%`,
+            background: turn.outcome === "completed" ? "var(--timeline-accent)" : "var(--destructive)",
+          }}
+        />
+      </span>
+    </button>
+  );
+  return (
+    <li className="flex items-center transition-colors hover:bg-muted/50">
+      {turn.turnId && turn.threadId ? (
+        <TraceDialog threadId={turn.threadId} turnId={turn.turnId} open={open} onOpenChange={setOpen}>
+          {row}
+        </TraceDialog>
+      ) : (
+        row
+      )}
+      <button
+        type="button"
+        title="Go to the thread"
+        aria-label="Go to the thread"
+        onClick={() => turn.threadId && navigate.toThread(turn.threadId)}
+        className="mx-2 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      >
+        <Icon name="ArrowUpRight" className="size-4" aria-hidden />
+      </button>
+    </li>
   );
 }
 

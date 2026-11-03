@@ -17,7 +17,7 @@ NDJSON format OpenBot uses for `trace.ndjson` and `resources.ndjson`.
 ## Reading it
 
 Every answer gets a small chip with the turn's duration and tool count.
-Click it for a waterfall of that turn in the side panel: each command, tool
+Click it for a trace viewer of that turn: each command, tool
 call and thinking block on one timeline, failures in red, live while the
 turn runs. The **Tracing** page in the sidebar shows all threads at once.
 
