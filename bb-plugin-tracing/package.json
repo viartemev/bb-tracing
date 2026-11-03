@@ -8,7 +8,7 @@
   },
   "bb": {
     "name": "Tracing",
-    "description": "Tracing for bb: a trace under every answer, a waterfall of each turn's tools and thinking, and a dashboard, stored as NDJSON like OpenBot.",
+    "description": "See where every second of an agent turn went: a trace under every answer, with API retries, generation gaps and token spend.",
     "branding": {
       "icon": "./icons/activity.svg",
       "experimental_icons": {
